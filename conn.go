@@ -416,6 +416,7 @@ var timestampWithTimezoneConverter = valueConverterFunc(func(val interface{}) (d
 	return nil, fmt.Errorf("%s: failed to convert %v (%T) into type time.Time", DriverName, val, val)
 })
 
+// varbinaryConverter converts varbinary to a byte slice
 var varbinaryConverter = valueConverterFunc(func(val interface{}) (driver.Value, error) {
 	if val == nil {
 		return nil, nil
