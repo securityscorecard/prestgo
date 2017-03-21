@@ -220,6 +220,8 @@ func (r *rows) fetch() error {
 					r.types[i] = varbinaryConverter
 				case col.Type == ArrayVarchar:
 					r.types[i] = arrayVarcharConverter
+				case col.Type == ArrayBigInt, col.Type == ArrayInteger:
+					r.types[i] = arrayBigIntConverter
 
 				default:
 					return fmt.Errorf("unsupported column type: %s", col.Type)
@@ -490,4 +492,29 @@ var arrayVarcharConverter = valueConverterFunc(func(val interface{}) (driver.Val
 	}
 
 	return nil, fmt.Errorf("%s: failed to convert %v (%T) into type []string", DriverName, val, val)
+})
+
+// arrayBigIntConverter converts a value from the underlying json response into an []int64.
+// The Go JSON decoder uses float64 for generic numeric values
+var arrayBigIntConverter = valueConverterFunc(func(val interface{}) (driver.Value, error) {
+	if val == nil {
+		return nil, nil
+	}
+
+	if vv, ok := val.([]interface{}); ok {
+		var outSlice []int64
+
+		for _, v := range vv {
+			vfloat, ok := v.(float64)
+			if !ok {
+				return nil, fmt.Errorf("unexpected non-float64 value in array<bigint>: %v", v)
+			}
+
+			outSlice = append(outSlice, int64(vfloat))
+		}
+
+		return outSlice, nil
+	}
+
+	return nil, fmt.Errorf("%s: failed to convert %v (%T) into type []int64", DriverName, val, val)
 })

@@ -787,3 +787,49 @@ func TestArrayVarcharConverter(t *testing.T) {
 
 	}
 }
+
+func TestArrayBigIntConverter(t *testing.T) {
+	testCases := []struct {
+		val      interface{}
+		expected driver.Value
+		err      bool
+	}{
+		{
+			val:      []interface{}{1000.0, 1.0},
+			expected: []int64{1000, 1},
+			err:      false,
+		},
+		{
+			val:      "foo",
+			expected: nil,
+			err:      true,
+		},
+		{
+			val:      []interface{}{"Infinity"},
+			expected: nil,
+			err:      true,
+		},
+		{
+			val:      []interface{}{"NaN"},
+			expected: nil,
+			err:      true,
+		},
+		{
+			val:      nil,
+			expected: nil,
+			err:      false,
+		},
+	}
+
+	for _, tc := range testCases {
+		v, err := arrayBigIntConverter(tc.val)
+
+		if tc.err == (err == nil) {
+			t.Errorf("%v: got error %v, wanted %v", tc.val, err, tc.err)
+		}
+
+		if !reflect.DeepEqual(v, tc.expected) {
+			t.Errorf("%v: got %v, wanted %v", tc.val, v, tc.expected)
+		}
+	}
+}

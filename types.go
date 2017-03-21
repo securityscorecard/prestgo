@@ -43,6 +43,12 @@ const (
 
 	// Array of variable length character data.
 	ArrayVarchar = "array(varchar)"
+
+	// Array of bigint
+	ArrayBigInt = "array(bigint)"
+
+	// Array of integer assumed to be an alias for ArrayBigInt
+	ArrayInteger = "array(integer)"
 )
 
 type stmtResponse struct {
